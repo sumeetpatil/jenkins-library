@@ -31,6 +31,11 @@ type FortifyReportData struct {
 	Suppressed        int
 }
 
+type SpotChecksAuditCount struct {
+	audited int
+	total   int
+}
+
 func CreateCustomReport(data FortifyReportData, issueGroups []*models.ProjectVersionIssueGroup) reporting.ScanReport {
 
 	scanReport := reporting.ScanReport{
