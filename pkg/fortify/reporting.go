@@ -2,6 +2,7 @@ package fortify
 
 import (
 	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -16,19 +17,27 @@ import (
 )
 
 type FortifyReportData struct {
-	ProjectName       string
-	ProjectVersion    string
-	Violations        int
-	CorporateTotal    int
-	CorporateAudited  int
-	AuditAllTotal     int
-	AuditAllAudited   int
-	SpotChecksTotal   int
-	SpotChecksAudited int
-	SpotChecksGap     int
-	Suspicious        int
-	Exploitable       int
-	Suppressed        int
+	ProjectName                         string
+	ProjectVersion                      string
+	Violations                          int
+	CorporateTotal                      int
+	CorporateAudited                    int
+	AuditAllTotal                       int
+	AuditAllAudited                     int
+	SpotChecksTotal                     int
+	SpotChecksAudited                   int
+	SpotChecksGap                       int
+	Suspicious                          int
+	Exploitable                         int
+	Suppressed                          int
+	AtleastOneSpotChecksCategoryAudited bool
+	SpotChecksCategories                *[]SpotChecksAuditCount
+}
+
+type SpotChecksAuditCount struct {
+	Audited int
+	Total   int
+	Type    string
 }
 
 func CreateCustomReport(data FortifyReportData, issueGroups []*models.ProjectVersionIssueGroup) reporting.ScanReport {
@@ -77,7 +86,7 @@ func CreateCustomReport(data FortifyReportData, issueGroups []*models.ProjectVer
 	return scanReport
 }
 
-func WriteCustomReports(scanReport reporting.ScanReport, projectName, projectVersion string) ([]piperutils.Path, error) {
+func WriteCustomReports(scanReport reporting.ScanReport, reportingData FortifyReportData) ([]piperutils.Path, error) {
 	utils := piperutils.Files{}
 	reportPaths := []piperutils.Path{}
 
@@ -103,12 +112,27 @@ func WriteCustomReports(scanReport reporting.ScanReport, projectName, projectVer
 			return reportPaths, errors.Wrap(err, "failed to create reporting directory")
 		}
 	}
-	if err := utils.FileWrite(filepath.Join(reporting.StepReportDirectory, fmt.Sprintf("fortifyExecuteScan_sast_%v.json", reportShaFortify([]string{projectName, projectVersion}))), jsonReport, 0666); err != nil {
+	if err := utils.FileWrite(filepath.Join(reporting.StepReportDirectory, fmt.Sprintf("fortifyExecuteScan_sast_%v.json", reportShaFortify([]string{reportingData.ProjectName, reportingData.ProjectVersion}))), jsonReport, 0666); err != nil {
 		return reportPaths, errors.Wrapf(err, "failed to write json report")
 	}
 	// we do not add the json report to the overall list of reports for now,
 	// since it is just an intermediary report used as input for later
 	// and there does not seem to be real benefit in archiving it.
+
+	// Standard JSON Report
+	log.Entry().Info("Writing json report")
+	jsonComplianceReportPath := filepath.Join(ReportsDirectory, "piper_fortify_report.json")
+	// Ensure reporting directory exists
+	if err := utils.MkdirAll(ReportsDirectory, 0777); err != nil {
+		return reportPaths, errors.Wrapf(err, "failed to create report directory")
+	}
+
+	file, _ := json.Marshal(reportingData)
+	if err := utils.FileWrite(jsonComplianceReportPath, file, 0666); err != nil {
+		log.SetErrorCategory(log.ErrorConfiguration)
+		return reportPaths, errors.Wrapf(err, "failed to write fortify json compliance report")
+	}
+	reportPaths = append(reportPaths, piperutils.Path{Name: "Fortify JSON Compliance Report", Target: jsonComplianceReportPath})
 
 	return reportPaths, nil
 }
