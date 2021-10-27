@@ -17,25 +17,27 @@ import (
 )
 
 type FortifyReportData struct {
-	ProjectName          string
-	ProjectVersion       string
-	Violations           int
-	CorporateTotal       int
-	CorporateAudited     int
-	AuditAllTotal        int
-	AuditAllAudited      int
-	SpotChecksTotal      int
-	SpotChecksAudited    int
-	SpotChecksGap        int
-	Suspicious           int
-	Exploitable          int
-	Suppressed           int
-	SpotChecksCategories map[string]*SpotChecksAuditCount
+	ProjectName                          string
+	ProjectVersion                       string
+	Violations                           int
+	CorporateTotal                       int
+	CorporateAudited                     int
+	AuditAllTotal                        int
+	AuditAllAudited                      int
+	SpotChecksTotal                      int
+	SpotChecksAudited                    int
+	SpotChecksGap                        int
+	Suspicious                           int
+	Exploitable                          int
+	Suppressed                           int
+	AtleastOneSpotCheckesCategoryAudited bool
+	SpotChecksCategories                 *[]SpotChecksAuditCount
 }
 
 type SpotChecksAuditCount struct {
-	audited int
-	total   int
+	Audited int
+	Total   int
+	Type    string
 }
 
 func CreateCustomReport(data FortifyReportData, issueGroups []*models.ProjectVersionIssueGroup) reporting.ScanReport {

@@ -276,8 +276,8 @@ func verifyFFProjectCompliance(config fortifyExecuteScanOptions, sys fortify.Sys
 	}
 	log.Entry().Debugf("initial filter selector set: %v", issueFilterSelectorSet)
 
-	spotChecksCountByCategory := map[string]*fortify.SpotChecksAuditCount{}
-	numberOfViolations, issueGroups, err := analyseUnauditedIssues(config, sys, projectVersion, filterSet, issueFilterSelectorSet, influx, auditStatus, spotChecksCountByCategory)
+	spotChecksCountByCategory := []fortify.SpotChecksAuditCount{}
+	numberOfViolations, issueGroups, err := analyseUnauditedIssues(config, sys, projectVersion, filterSet, issueFilterSelectorSet, influx, auditStatus, &spotChecksCountByCategory)
 	if err != nil {
 		return errors.Wrap(err, "failed to analyze unaudited issues"), reports
 	}
@@ -293,7 +293,16 @@ func verifyFFProjectCompliance(config fortifyExecuteScanOptions, sys fortify.Sys
 	influx.fortify_data.fields.violations = numberOfViolations
 
 	fortifyReportingData := prepareReportData(influx)
-	fortifyReportingData.SpotChecksCategories = spotChecksCountByCategory
+
+	fortifyReportingData.AtleastOneSpotCheckesCategoryAudited = true
+	for _, spotChecksElement := range spotChecksCountByCategory {
+		if spotChecksElement.Total > 0 && spotChecksElement.Audited == 0 {
+			fortifyReportingData.AtleastOneSpotCheckesCategoryAudited = false
+			break
+		}
+	}
+
+	fortifyReportingData.SpotChecksCategories = &spotChecksCountByCategory
 	scanReport := fortify.CreateCustomReport(fortifyReportingData, issueGroups)
 	paths, err := fortify.WriteCustomReports(scanReport, fortifyReportingData)
 	if err != nil {
@@ -325,7 +334,7 @@ func prepareReportData(influx *fortifyExecuteScanInflux) fortify.FortifyReportDa
 	return output
 }
 
-func analyseUnauditedIssues(config fortifyExecuteScanOptions, sys fortify.System, projectVersion *models.ProjectVersion, filterSet *models.FilterSet, issueFilterSelectorSet *models.IssueFilterSelectorSet, influx *fortifyExecuteScanInflux, auditStatus map[string]string, spotChecksCountByCategory map[string]*fortify.SpotChecksAuditCount) (int, []*models.ProjectVersionIssueGroup, error) {
+func analyseUnauditedIssues(config fortifyExecuteScanOptions, sys fortify.System, projectVersion *models.ProjectVersion, filterSet *models.FilterSet, issueFilterSelectorSet *models.IssueFilterSelectorSet, influx *fortifyExecuteScanInflux, auditStatus map[string]string, spotChecksCountByCategory *[]fortify.SpotChecksAuditCount) (int, []*models.ProjectVersionIssueGroup, error) {
 	log.Entry().Info("Analyzing unaudited issues")
 	reducedFilterSelectorSet := sys.ReduceIssueFilterSelectorSet(issueFilterSelectorSet, []string{"Folder"}, nil)
 	fetchedIssueGroups, err := sys.GetProjectIssuesByIDAndFilterSetGroupedBySelector(projectVersion.ID, "", filterSet.GUID, reducedFilterSelectorSet)
@@ -343,7 +352,7 @@ func analyseUnauditedIssues(config fortifyExecuteScanOptions, sys fortify.System
 	return overallViolations, fetchedIssueGroups, nil
 }
 
-func getIssueDeltaFor(config fortifyExecuteScanOptions, sys fortify.System, issueGroup *models.ProjectVersionIssueGroup, projectVersionID int64, filterSet *models.FilterSet, issueFilterSelectorSet *models.IssueFilterSelectorSet, influx *fortifyExecuteScanInflux, auditStatus map[string]string, spotChecksCountByCategory map[string]*fortify.SpotChecksAuditCount) (int, error) {
+func getIssueDeltaFor(config fortifyExecuteScanOptions, sys fortify.System, issueGroup *models.ProjectVersionIssueGroup, projectVersionID int64, filterSet *models.FilterSet, issueFilterSelectorSet *models.IssueFilterSelectorSet, influx *fortifyExecuteScanInflux, auditStatus map[string]string, spotChecksCountByCategory *[]fortify.SpotChecksAuditCount) (int, error) {
 	totalMinusAuditedDelta := 0
 	group := ""
 	total := 0
@@ -391,7 +400,7 @@ func getIssueDeltaFor(config fortifyExecuteScanOptions, sys fortify.System, issu
 	return totalMinusAuditedDelta, nil
 }
 
-func getSpotIssueCount(config fortifyExecuteScanOptions, sys fortify.System, spotCheckCategories []*models.ProjectVersionIssueGroup, projectVersionID int64, filterSet *models.FilterSet, issueFilterSelectorSet *models.IssueFilterSelectorSet, influx *fortifyExecuteScanInflux, auditStatus map[string]string, spotChecksCountByCategory map[string]*fortify.SpotChecksAuditCount) int {
+func getSpotIssueCount(config fortifyExecuteScanOptions, sys fortify.System, spotCheckCategories []*models.ProjectVersionIssueGroup, projectVersionID int64, filterSet *models.FilterSet, issueFilterSelectorSet *models.IssueFilterSelectorSet, influx *fortifyExecuteScanInflux, auditStatus map[string]string, spotChecksCountByCategory *[]fortify.SpotChecksAuditCount) int {
 	overallDelta := 0
 	overallIssues := 0
 	overallIssuesAudited := 0
@@ -425,6 +434,7 @@ func getSpotIssueCount(config fortifyExecuteScanOptions, sys fortify.System, spo
 		overallIssuesAudited += audited
 
 		auditStatus[group] = fmt.Sprintf("%v total : %v audited %v", total, audited, flagOutput)
+		*spotChecksCountByCategory = append(*spotChecksCountByCategory, fortify.SpotChecksAuditCount{Audited: audited, Total: total, Type: group})
 	}
 
 	influx.fortify_data.fields.spotChecksTotal = overallIssues
