@@ -17,21 +17,21 @@ import (
 )
 
 type FortifyReportData struct {
-	ProjectName                          string
-	ProjectVersion                       string
-	Violations                           int
-	CorporateTotal                       int
-	CorporateAudited                     int
-	AuditAllTotal                        int
-	AuditAllAudited                      int
-	SpotChecksTotal                      int
-	SpotChecksAudited                    int
-	SpotChecksGap                        int
-	Suspicious                           int
-	Exploitable                          int
-	Suppressed                           int
-	AtleastOneSpotCheckesCategoryAudited bool
-	SpotChecksCategories                 *[]SpotChecksAuditCount
+	ProjectName                         string
+	ProjectVersion                      string
+	Violations                          int
+	CorporateTotal                      int
+	CorporateAudited                    int
+	AuditAllTotal                       int
+	AuditAllAudited                     int
+	SpotChecksTotal                     int
+	SpotChecksAudited                   int
+	SpotChecksGap                       int
+	Suspicious                          int
+	Exploitable                         int
+	Suppressed                          int
+	AtleastOneSpotChecksCategoryAudited bool
+	SpotChecksCategories                *[]SpotChecksAuditCount
 }
 
 type SpotChecksAuditCount struct {
@@ -120,6 +120,7 @@ func WriteCustomReports(scanReport reporting.ScanReport, reportingData FortifyRe
 	// and there does not seem to be real benefit in archiving it.
 
 	// Standard JSON Report
+	log.Entry().Info("Writing json report")
 	jsonComplianceReportPath := filepath.Join(ReportsDirectory, "piper_fortify_report.json")
 	// Ensure reporting directory exists
 	if err := utils.MkdirAll(ReportsDirectory, 0777); err != nil {
