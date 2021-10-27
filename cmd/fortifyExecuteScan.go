@@ -294,10 +294,10 @@ func verifyFFProjectCompliance(config fortifyExecuteScanOptions, sys fortify.Sys
 
 	fortifyReportingData := prepareReportData(influx)
 
-	fortifyReportingData.AtleastOneSpotCheckesCategoryAudited = true
+	fortifyReportingData.AtleastOneSpotChecksCategoryAudited = true
 	for _, spotChecksElement := range spotChecksCountByCategory {
 		if spotChecksElement.Total > 0 && spotChecksElement.Audited == 0 {
-			fortifyReportingData.AtleastOneSpotCheckesCategoryAudited = false
+			fortifyReportingData.AtleastOneSpotChecksCategoryAudited = false
 			break
 		}
 	}
