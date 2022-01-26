@@ -76,6 +76,7 @@ const checkString = "<---CHECK FORTIFY---"
 const classpathFileName = "fortify-execute-scan-cp.txt"
 
 func fortifyExecuteScan(config fortifyExecuteScanOptions, telemetryData *telemetry.CustomData, influx *fortifyExecuteScanInflux) {
+        log.Entry().Infof("Test Log Sumeet")
 	auditStatus := map[string]string{}
 	sys := fortify.NewSystemInstance(config.ServerURL, config.APIEndpoint, config.AuthToken, time.Minute*15)
 	utils := newFortifyUtilsBundle()
