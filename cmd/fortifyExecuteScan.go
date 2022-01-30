@@ -208,9 +208,11 @@ func runFortifyScan(config fortifyExecuteScanOptions, sys fortify.System, utils 
 	if config.UpdateRulePack {
 		err := utils.RunExecutable("fortifyupdate", "-acceptKey", "-acceptSSLCertificate", "-url", config.ServerURL)
 		if err != nil {
+			log.Entry().Errorf("update error %w", err)
 			return reports, fmt.Errorf("failed to update rule pack, serverUrl: %v", config.ServerURL)
 		}
 		err = utils.RunExecutable("fortifyupdate", "-acceptKey", "-acceptSSLCertificate", "-showInstalledRules")
+		log.Entry().Errorf("update error %w", err)
 		if err != nil {
 			return reports, fmt.Errorf("failed to fetch details of installed rule pack, serverUrl: %v", config.ServerURL)
 		}
