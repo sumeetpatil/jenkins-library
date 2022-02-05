@@ -606,6 +606,6 @@ private List getContainerEnvs(config, imageName, defaultEnvVars, defaultConfig) 
             containerEnv << envVar(key: k, value: v)
     }
 
-    echo "Container ENVs ${containerParams}"
+    echo "Container ENVs ${containerEnv}"
     return containerEnv
 }
