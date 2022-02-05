@@ -486,6 +486,7 @@ private List getContainerList(config) {
             jnlpSpec.resources = resources
         }
 
+         echo "jnlpSpec containerSpec ${jnlpSpec}"
         result.push(jnlpSpec)
     }
     config.containerMap.each { imageName, containerName ->
@@ -537,6 +538,7 @@ private List getContainerList(config) {
         if(resources) {
             containerSpec.resources = resources
         }
+         echo "containerSpec ${containerSpec}"
         result.push(containerSpec)
     }
     if (config.sidecarImage) {
@@ -552,6 +554,7 @@ private List getContainerList(config) {
         if(resources) {
             containerSpec.resources = resources
         }
+        echo "containerSpec ${containerSpec}"
         result.push(containerSpec)
     }
 
