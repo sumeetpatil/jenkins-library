@@ -554,6 +554,8 @@ private List getContainerList(config) {
         }
         result.push(containerSpec)
     }
+
+    echo "Whole Config ${config}"
     return result
 }
 
