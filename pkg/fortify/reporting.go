@@ -1,6 +1,7 @@
 package fortify
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
@@ -9,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	piperGithub "github.com/SAP/jenkins-library/pkg/github"
+	"github.com/SAP/jenkins-library/pkg/format"
 	"github.com/SAP/jenkins-library/pkg/log"
 	"github.com/SAP/jenkins-library/pkg/piperutils"
 	"github.com/SAP/jenkins-library/pkg/reporting"
@@ -49,7 +50,7 @@ type SpotChecksAuditCount struct {
 func CreateCustomReport(data FortifyReportData, issueGroups []*models.ProjectVersionIssueGroup) reporting.ScanReport {
 
 	scanReport := reporting.ScanReport{
-		Title: "Fortify SAST Report",
+		ReportTitle: "Fortify SAST Report",
 		Subheaders: []reporting.Subheader{
 			{Description: "Fortify project name", Details: data.ProjectName},
 			{Description: "Fortify project version", Details: data.ProjectVersion},
@@ -130,6 +131,38 @@ func WriteJSONReport(jsonReport FortifyReportData) ([]piperutils.Path, error) {
 	return reportPaths, nil
 }
 
+func WriteSarif(sarif format.SARIF) ([]piperutils.Path, error) {
+	utils := piperutils.Files{}
+	reportPaths := []piperutils.Path{}
+
+	sarifReportPath := filepath.Join(ReportsDirectory, "result.sarif")
+	// Ensure reporting directory exists
+	if err := utils.MkdirAll(ReportsDirectory, 0777); err != nil {
+		return reportPaths, errors.Wrapf(err, "failed to create report directory")
+	}
+
+	// This solution did not allow for special HTML characters. If this causes any issue, revert l148-l157 with these two
+	/*file, _ := json.MarshalIndent(sarif, "", "  ")
+	if err := utils.FileWrite(sarifReportPath, file, 0666); err != nil {*/
+
+	// HTML characters will most likely be present: we need to use encode: create a buffer to hold JSON data
+	buffer := new(bytes.Buffer)
+	// create JSON encoder for buffer
+	bufEncoder := json.NewEncoder(buffer)
+	// set options
+	bufEncoder.SetEscapeHTML(false)
+	bufEncoder.SetIndent("", "  ")
+	//encode to buffer
+	bufEncoder.Encode(sarif)
+	if err := utils.FileWrite(sarifReportPath, buffer.Bytes(), 0666); err != nil {
+		log.SetErrorCategory(log.ErrorConfiguration)
+		return reportPaths, errors.Wrapf(err, "failed to write fortify SARIF report")
+	}
+	reportPaths = append(reportPaths, piperutils.Path{Name: "Fortify SARIF Report", Target: sarifReportPath})
+
+	return reportPaths, nil
+}
+
 func WriteCustomReports(scanReport reporting.ScanReport) ([]piperutils.Path, error) {
 	utils := piperutils.Files{}
 	reportPaths := []piperutils.Path{}
@@ -151,27 +184,6 @@ func WriteCustomReports(scanReport reporting.ScanReport) ([]piperutils.Path, err
 	// since it is just an intermediary report used as input for later
 	// and there does not seem to be real benefit in archiving it.
 	return reportPaths, nil
-}
-
-func UploadReportToGithub(scanReport reporting.ScanReport, token, APIURL, owner, repository string, assignees []string) error {
-	// JSON reports are used by step pipelineCreateSummary in order to e.g. prepare an issue creation in GitHub
-	// ignore JSON errors since structure is in our hands
-	markdownReport, _ := scanReport.ToMarkdown()
-	options := piperGithub.CreateIssueOptions{
-		Token:          token,
-		APIURL:         APIURL,
-		Owner:          owner,
-		Repository:     repository,
-		Title:          "Fortify SAST Results",
-		Body:           markdownReport,
-		Assignees:      assignees,
-		UpdateExisting: true,
-	}
-	err := piperGithub.CreateIssue(&options)
-	if err != nil {
-		return errors.Wrap(err, "failed to upload fortify results into GitHub issue")
-	}
-	return nil
 }
 
 func reportShaFortify(parts []string) string {
