@@ -118,7 +118,9 @@ void call(Map parameters = [:]) {
         if (scmInfo) {
             setGitUrlsOnCommonPipelineEnvironment(script, scmInfo.GIT_URL)
             script.commonPipelineEnvironment.setGitCommitId(scmInfo.GIT_COMMIT)
-            setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_BRANCH)
+
+            def gitUtils = parameters.gitUtils ?: new GitUtils()
+            setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_BRANCH, gitUtils.isMergeCommit(scmInfo.GIT_COMMIT))
         }
     }
 }
@@ -261,7 +263,7 @@ private void setGitUrlsOnCommonPipelineEnvironment(script, String gitUrl) {
     script.commonPipelineEnvironment.setGithubRepo(gitRepo)
 }
 
-private void setGitRefOnCommonPipelineEnvironment(script, String gitBranch) {
+private void setGitRefOnCommonPipelineEnvironment(script, String gitBranch, boolean isMergeCommit) {
     if(!gitBranch){
         return
     }
@@ -270,9 +272,8 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitBranch) {
         gitBranch = gitBranch.split("/")[1]
     }
 
-    //TODO: refs for merge pull requests
     if (gitBranch.contains("PR")) {
-		script.commonPipelineEnvironment.setGitRef("refs/pull/" + gitBranch.split("-")[1] + "/head")
+		script.commonPipelineEnvironment.setGitRef("refs/pull/" + gitBranch.split("-")[1] + "/" + isMergeCommit?"merge":"head")
 	} else {
 		script.commonPipelineEnvironment.setGitRef("refs/heads/" + gitBranch)
 	}

@@ -321,14 +321,40 @@ class SetupCommonPipelineEnvironmentTest extends BasePiperTest {
 
     @Test
     void "Set scmInfo parameter sets git reference for pull request"() {
+
+        def GitUtils gitUtils = new GitUtils() {
+            boolean isMergeCommit(String gitCommitId){
+                return false
+            }
+        }
+
         helper.registerAllowedMethod("fileExists", [String], { String path ->
             return path.endsWith('.pipeline/config.yml')
         })
 
-        def dummyScmInfo = [GIT_BRANCH: 'PR-42']
+        def dummyScmInfo = [GIT_COMMIT: 'dummy_git_commit_id', GIT_BRANCH: 'PR-42']
 
         stepRule.step.setupCommonPipelineEnvironment(script: nullScript, scmInfo: dummyScmInfo)
         assertThat(nullScript.commonPipelineEnvironment.gitRef, is('refs/pull/42/head'))
+    }
+
+    @Test
+    void "Set scmInfo parameter sets git reference for merge commit pull request"() {
+
+        def GitUtils gitUtils = new GitUtils() {
+            boolean isMergeCommit(String gitCommitId){
+                return true
+            }
+        }
+
+        helper.registerAllowedMethod("fileExists", [String], { String path ->
+            return path.endsWith('.pipeline/config.yml')
+        })
+
+        def dummyScmInfo = [GIT_COMMIT: 'dummy_git_commit_id', GIT_BRANCH: 'PR-42']
+
+        stepRule.step.setupCommonPipelineEnvironment(script: nullScript, scmInfo: dummyScmInfo, gitUtils: gitUtils)
+        assertThat(nullScript.commonPipelineEnvironment.gitRef, is('refs/pull/42/merge'))
     }
 
     @Test

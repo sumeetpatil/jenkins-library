@@ -4,6 +4,11 @@ boolean insideWorkTree() {
     return sh(returnStatus: true, script: 'git rev-parse --is-inside-work-tree 1>/dev/null 2>&1') == 0
 }
 
+boolean isMergeCommit(String gitCommitId){
+    def cmd = 'git rev-parse --verify -q '+gitCommitId+'^2 > /dev/null; echo $?'
+    return sh(returnStatus: true, script: cmd) == 0
+}
+
 boolean isWorkTreeDirty() {
 
     if(!insideWorkTree()) error 'Method \'isWorkTreeClean\' called outside a git work tree.'
