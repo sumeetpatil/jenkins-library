@@ -6,6 +6,7 @@ import com.sap.piper.GenerateDocumentation
 import com.sap.piper.ConfigurationHelper
 import com.sap.piper.Utils
 import com.sap.piper.analytics.InfluxData
+import com.sap.piper.GitUtils
 
 import groovy.transform.Field
 
