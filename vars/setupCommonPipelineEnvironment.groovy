@@ -274,7 +274,8 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitBranch, bool
     }
 
     if (gitBranch.contains("PR")) {
-		script.commonPipelineEnvironment.setGitRef("refs/pull/" + gitBranch.split("-")[1] + "/" + isMergeCommit?"merge":"head")
+        def mergeOrHead = isMergeCommit?"merge":"head"
+		script.commonPipelineEnvironment.setGitRef("refs/pull/" + gitBranch.split("-")[1] + "/" + mergeOrHead)
 	} else {
 		script.commonPipelineEnvironment.setGitRef("refs/heads/" + gitBranch)
 	}
