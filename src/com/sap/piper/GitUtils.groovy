@@ -5,7 +5,7 @@ boolean insideWorkTree() {
 }
 
 boolean isMergeCommit(String gitCommitId){
-    def cmd = 'git rev-parse --verify '+gitCommitId+'^2'
+    def cmd = 'git rev-parse --verify -q '+gitCommitId+'^2'
     return sh(returnStatus: true, script: cmd) == 0
 }
 
