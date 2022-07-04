@@ -292,8 +292,8 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, Stri
             def gitToken
             if(script.commonPipelineEnvironment.configuration.general?.githubTokenCredentialsId){
                 gitToken = script.commonPipelineEnvironment.configuration.githubTokenCredentialsId
-            }else if(script.commonPipelineEnvironment.configuration.steps?.codeqlExecuteScan){
-                gitToken = script.commonPipelineEnvironment.configuration.steps.codeqlExecuteScan
+            }else if(script.commonPipelineEnvironment.configuration.steps?.codeqlExecuteScan?.githubTokenCredentialsId){
+                gitToken = script.commonPipelineEnvironment.configuration.steps.codeqlExecuteScan.githubTokenCredentialsId
             }
 
             print "change id ${changeId} and token ${gitToken}"
