@@ -299,7 +299,7 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitUrl, String 
             print "change id ${changeId} and token ${gitToken}"
             if(gitToken){
                 Map url = parseUrl(gitUrl)
-                def gitUrlWithToken = "https://jenkins:${token}@${url.host}:${url.path}.git"
+                def gitUrlWithToken = "https://jenkins:${gitToken}@${url.host}:${url.path}.git"
                 String gitCommitId = gitUtils.getGitMergeCommit(changeId, gitToken, gitUrlWithToken)
                 print "commitId ${gitCommitId}"
                 script.commonPipelineEnvironment.setGitCommitId(gitCommitId)
