@@ -9,6 +9,15 @@ boolean isMergeCommit(String gitCommitId){
     return sh(returnStatus: true, script: cmd) == 0
 }
 
+boolean getGitMergeCommit(String gitChangeId, String credentialId){
+    def ref = "refs/remotes/origin/pull/"+gitChangeId+"/merge"
+    def cmd = "git rev-parse " + ref
+    withCredentials([gitUsernamePassword(credentialsId: credentialId, gitToolName: 'git-tool')]) {
+            sh 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"'
+    }
+    return sh(returnStdout: true, script: cmd).trim()
+}
+
 boolean isWorkTreeDirty() {
 
     if(!insideWorkTree()) error 'Method \'isWorkTreeClean\' called outside a git work tree.'
