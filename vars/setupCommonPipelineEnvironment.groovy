@@ -119,6 +119,10 @@ void call(Map parameters = [:]) {
             print "key = ${e.key}, value = ${e.value}"
         }
 
+        for ( e in parameters ) {
+            print "key = ${e.key}, value = ${e.value}"
+        }
+
         def scmInfo = parameters.scmInfo
         if (scmInfo) {
             setGitUrlsOnCommonPipelineEnvironment(script, scmInfo.GIT_URL)
