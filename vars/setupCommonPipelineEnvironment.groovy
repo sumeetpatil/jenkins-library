@@ -296,7 +296,7 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, Stri
             }
 
             if(gitToken){
-                def gitCommitId = script.commonPipelineEnvironment.setgitUtils.getGitMergeCommit(gitToken, gitBranch.split("-")[1])
+                def gitCommitId = gitUtils.getGitMergeCommit(gitBranch.split("-")[1], gitToken)
                 print "commitId ${gitCommitId}"
                 script.commonPipelineEnvironment.setGitCommitId(gitCommitId)
             }
