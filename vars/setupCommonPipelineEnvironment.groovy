@@ -133,7 +133,7 @@ void call(Map parameters = [:]) {
             script.commonPipelineEnvironment.setGitCommitId(scmInfo.GIT_COMMIT)
 
             def gitUtils = parameters.gitUtils ?: new GitUtils()
-            setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_BRANCH, gitUtils)
+            setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_COMMIT, scmInfo.GIT_BRANCH, gitUtils)
         }
     }
 }
@@ -276,7 +276,7 @@ private void setGitUrlsOnCommonPipelineEnvironment(script, String gitUrl) {
     script.commonPipelineEnvironment.setGithubRepo(gitRepo)
 }
 
-private void setGitRefOnCommonPipelineEnvironment(script, String gitBranch, def gitUtils) {
+private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, String gitBranch, def gitUtils) {
     if(!gitBranch){
         return
     }
@@ -286,7 +286,7 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitBranch, def 
     }
 
     if (gitBranch.contains("PR")) {
-        boolean isMergeCommit = gitUtils.isMergeCommit(scmInfo.GIT_COMMIT)
+        boolean isMergeCommit = gitUtils.isMergeCommit(gitCommit)
         if(isMergeCommit){
             def gitToken
             if(script.commonPipelineEnvironment.configuration.general?.githubTokenCredentialsId){
@@ -296,7 +296,9 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitBranch, def 
             }
 
             if(gitToken){
-                gitUtils.getGitMergeCommit(gitToken, gitBranch.split("-")[1])
+                def gitCommitId = script.commonPipelineEnvironment.setgitUtils.getGitMergeCommit(gitToken, gitBranch.split("-")[1])
+                print "commitId ${gitCommitId}"
+                script.commonPipelineEnvironment.setGitCommitId(gitCommitId)
             }
         }
 
