@@ -116,11 +116,15 @@ void call(Map parameters = [:]) {
         InfluxData.addField('pipeline_data', 'build_url', env.BUILD_URL)
 
         for ( e in config ) {
-            print "key = ${e.key}, value = ${e.value}"
+            print "configkey = ${e.key}, value = ${e.value}"
         }
 
         for ( e in parameters ) {
-            print "key = ${e.key}, value = ${e.value}"
+            print "paramskey = ${e.key}, value = ${e.value}"
+        }
+
+        for ( e in script.commonPipelineEnvironment.configuration ) {
+            print "configurationkey = ${e.key}, value = ${e.value}"
         }
 
         def scmInfo = parameters.scmInfo
