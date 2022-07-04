@@ -4,10 +4,12 @@ import groovy.transform.Field
 @Field String METADATA_FILE = 'metadata/codeqlExecuteScan.yaml'
 
 void call(Map parameters = [:]) {
-    List credentials = [[type: 'token', id: 'githubTokenCredentialsId', env: ['PIPER_githubToken']]]
-    for ( e in parameters ) {
+    final script = checkScript(this, parameters) ?: this
+    for ( e in script.commonPipelineEnvironment ) {
             print "key = ${e.key}, value = ${e.value}"
     }
     print "token = ${env.PIPER_githubToken}"
+
+    List credentials = [[type: 'token', id: 'githubTokenCredentialsId', env: ['PIPER_githubToken']]]
     piperExecuteBin(parameters, STEP_NAME, METADATA_FILE, credentials)
 }
