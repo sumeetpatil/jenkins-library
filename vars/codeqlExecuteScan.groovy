@@ -5,5 +5,9 @@ import groovy.transform.Field
 
 void call(Map parameters = [:]) {
     List credentials = [[type: 'token', id: 'githubTokenCredentialsId', env: ['PIPER_githubToken']]]
+    for ( e in parameters ) {
+            print "key = ${e.key}, value = ${e.value}"
+    }
+    print "token = ${env.PIPER_githubToken}"
     piperExecuteBin(parameters, STEP_NAME, METADATA_FILE, credentials)
 }
