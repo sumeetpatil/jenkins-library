@@ -133,7 +133,7 @@ void call(Map parameters = [:]) {
             script.commonPipelineEnvironment.setGitCommitId(scmInfo.GIT_COMMIT)
 
             def gitUtils = parameters.gitUtils ?: new GitUtils()
-            setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_COMMIT, scmInfo.GIT_BRANCH, gitUtils)
+            setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_URL, scmInfo.GIT_COMMIT, scmInfo.GIT_BRANCH, gitUtils)
         }
     }
 }
@@ -276,7 +276,7 @@ private void setGitUrlsOnCommonPipelineEnvironment(script, String gitUrl) {
     script.commonPipelineEnvironment.setGithubRepo(gitRepo)
 }
 
-private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, String gitBranch, def gitUtils) {
+private void setGitRefOnCommonPipelineEnvironment(script, String gitUrl, String gitCommit, String gitBranch, def gitUtils) {
     if(!gitBranch){
         return
     }
@@ -298,7 +298,9 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, Stri
 
             print "change id ${changeId} and token ${gitToken}"
             if(gitToken){
-                String gitCommitId = gitUtils.getGitMergeCommit(changeId, gitToken)
+                Map url = parseUrl(gitUrl)
+                def gitUrlWithToken = "https://jenkins:${token}@${url.host}:${url.path}.git"
+                String gitCommitId = gitUtils.getGitMergeCommit(changeId, gitToken, gitUrlWithToken)
                 print "commitId ${gitCommitId}"
                 script.commonPipelineEnvironment.setGitCommitId(gitCommitId)
             }
