@@ -13,6 +13,7 @@ String getGitMergeCommit(String gitChangeId, String credentialId, String gitUrlW
     def ref = "refs/remotes/origin/pull/"+gitChangeId+"/merge"
     def cmd = "git rev-parse " + ref
     withCredentials([string(credentialsId: credentialId, variable: 'SECRET')]) {
+        sh 'git remote -v'
         sh 'git remote set-url origin ' + gitUrlWithToken.replace(credentialId, "${SECRET}")
     }
     sh 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"'
