@@ -9,7 +9,7 @@ boolean isMergeCommit(String gitCommitId){
     return sh(returnStatus: true, script: cmd) == 0
 }
 
-boolean getGitMergeCommit(String gitChangeId, String credentialId){
+String getGitMergeCommit(String gitChangeId, String credentialId){
     def ref = "refs/remotes/origin/pull/"+gitChangeId+"/merge"
     def cmd = "git rev-parse " + ref
     withCredentials([gitUsernamePassword(credentialsId: credentialId, gitToolName: 'git-tool')]) {
