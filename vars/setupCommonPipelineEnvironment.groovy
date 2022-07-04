@@ -286,6 +286,7 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, Stri
     }
 
     if (gitBranch.contains("PR")) {
+        def changeId = gitBranch.split("-")[1]
         boolean isMergeCommit = gitUtils.isMergeCommit(gitCommit)
         if(isMergeCommit){
             def gitToken
@@ -295,15 +296,16 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, Stri
                 gitToken = script.commonPipelineEnvironment.configuration.steps.codeqlExecuteScan
             }
 
+            print "change id ${changeId} and token ${gitToken}"
             if(gitToken){
-                String gitCommitId = gitUtils.getGitMergeCommit(gitBranch.split("-")[1], gitToken)
+                String gitCommitId = gitUtils.getGitMergeCommit(changeId, gitToken)
                 print "commitId ${gitCommitId}"
                 script.commonPipelineEnvironment.setGitCommitId(gitCommitId)
             }
         }
 
         def mergeOrHead = isMergeCommit?"merge":"head"
-		script.commonPipelineEnvironment.setGitRef("refs/pull/" + gitBranch.split("-")[1] + "/" + mergeOrHead)
+		script.commonPipelineEnvironment.setGitRef("refs/pull/" + changeId + "/" + mergeOrHead)
 	} else {
 		script.commonPipelineEnvironment.setGitRef("refs/heads/" + gitBranch)
 	}
