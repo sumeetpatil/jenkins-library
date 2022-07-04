@@ -12,9 +12,7 @@ boolean isMergeCommit(String gitCommitId){
 String getGitMergeCommit(String gitChangeId, String credentialId){
     def ref = "refs/remotes/origin/pull/"+gitChangeId+"/merge"
     def cmd = "git rev-parse " + ref
-    withCredentials([gitUsernamePassword(credentialsId: credentialId, gitToolName: 'git-tool')]) {
-            sh 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"'
-    }
+    sh 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"'
     return sh(returnStdout: true, script: cmd).trim()
 }
 
