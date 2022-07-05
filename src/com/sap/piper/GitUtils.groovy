@@ -21,18 +21,13 @@ String getGitMergeCommitId(String gitChangeId){
 
 
     def scmCredId = remoteConfig[0].getCredentialsId()
-    def statusOfFetch = false
     try{
         withCredentials([gitUsernamePassword(credentialsId: scmCredId, gitToolName: 'git-tool')]) {
-            statusOfFetch = sh(returnStatus: true, script: 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"')
+            sh 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"'
         }
     } catch (Exception e) {
         echo 'Error in running git fetch'
         throw e
-    }
-
-    if(!statusOfFetch){
-        throw new Exception('Error in running git fetch')
     }
 
     String commitId
