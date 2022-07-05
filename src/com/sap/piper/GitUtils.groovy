@@ -10,7 +10,6 @@ boolean isMergeCommit(String gitCommitId){
 }
 
 String getGitMergeCommitId(String gitChangeId){
-    String commitId
     if(!scm){
         throw new Exception('scm content not found')
     }
@@ -36,7 +35,7 @@ String getGitMergeCommitId(String gitChangeId){
         throw new Exception('Error in running git fetch')
     }
 
-    def commitId
+    String commitId
     def cmd = "git rev-parse refs/remotes/origin/pull/"+gitChangeId+"/merge"
     try {
         commitId = sh(returnStdout: true, script: cmd).trim()
