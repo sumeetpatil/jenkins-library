@@ -284,6 +284,7 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, Stri
     def changeId = gitBranch.split("-")[1]
     script.commonPipelineEnvironment.setGitRef("refs/pull/" + changeId + "/" + mergeOrHead)
 
+    echo "is merge commitId ${isMergeCommit}"
     if(!isMergeCommit){
         script.commonPipelineEnvironment.setGitRemoteCommitId(gitCommit)
         return
