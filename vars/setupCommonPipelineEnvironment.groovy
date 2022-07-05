@@ -303,4 +303,7 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, Stri
     }else{
         script.commonPipelineEnvironment.setGitRemoteCommitId(gitCommit)
     }
+
+    def remoteCommit = script.commonPipelineEnvironment.getGitRemoteCommitId()
+    echo "remoteCommit ${remoteCommit}"
 }
