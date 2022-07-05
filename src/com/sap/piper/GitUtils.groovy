@@ -28,7 +28,7 @@ String getGitMergeCommitId(String gitChangeId){
             statusOfFetch = sh(returnStatus: true, script: 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"')
         }
     } catch (Exception e) {
-            echo 'Error in running git fetch ' + e.toString()
+            echo 'Error in running git fetch'
             throw new e
     }
 
