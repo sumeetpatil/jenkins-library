@@ -114,7 +114,6 @@ func uploadResults(config *codeqlExecuteScanOptions, utils codeqlExecuteScanUtil
 		}
 		repoInfo.ref = config.AnalyzedRef
 		repoInfo.commitId = config.CommitID
-		log.Entry().Info("CommitId " + repoInfo.commitId)
 
 		provider, err := orchestrator.NewOrchestratorSpecificConfigProvider()
 		if err != nil {
