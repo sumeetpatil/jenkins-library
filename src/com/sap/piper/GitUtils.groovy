@@ -21,7 +21,6 @@ String getGitMergeCommitId(String gitChangeId){
 
     echo scm.getUserRemoteConfigs()
 
-
     def scmCredId = remoteConfig[0].getCredentialsId()
     try{
         withCredentials([gitUsernamePassword(credentialsId: scmCredId, gitToolName: 'git-tool')]) {
