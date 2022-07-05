@@ -115,27 +115,13 @@ void call(Map parameters = [:]) {
         InfluxData.addField('step_data', 'build_url', env.BUILD_URL)
         InfluxData.addField('pipeline_data', 'build_url', env.BUILD_URL)
 
-        for ( e in config ) {
-            print "configkey = ${e.key}, value = ${e.value}"
-        }
-
-        for ( e in parameters ) {
-            print "paramskey = ${e.key}, value = ${e.value}"
-        }
-
-        for ( e in script.commonPipelineEnvironment.configuration ) {
-            print "configurationkey = ${e.key}, value = ${e.value}"
-        }
-
-        def scmCredId = scm.getUserRemoteConfigs()[0].getCredentialsId()
-        print "CredId ${scmCredId}"
         def scmInfo = parameters.scmInfo
         if (scmInfo) {
             setGitUrlsOnCommonPipelineEnvironment(script, scmInfo.GIT_URL)
             script.commonPipelineEnvironment.setGitCommitId(scmInfo.GIT_COMMIT)
 
             def gitUtils = parameters.gitUtils ?: new GitUtils()
-            setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_URL, scmInfo.GIT_COMMIT, scmInfo.GIT_BRANCH, gitUtils)
+            setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_COMMIT, scmInfo.GIT_BRANCH, gitUtils)
         }
     }
 }
@@ -278,7 +264,7 @@ private void setGitUrlsOnCommonPipelineEnvironment(script, String gitUrl) {
     script.commonPipelineEnvironment.setGithubRepo(gitRepo)
 }
 
-private void setGitRefOnCommonPipelineEnvironment(script, String gitUrl, String gitCommit, String gitBranch, def gitUtils) {
+private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, String gitBranch, def gitUtils) {
     if(!gitBranch){
         return
     }
@@ -287,30 +273,32 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitUrl, String 
         gitBranch = gitBranch.split("/")[1]
     }
 
-    if (gitBranch.contains("PR")) {
-        def changeId = gitBranch.split("-")[1]
-        boolean isMergeCommit = gitUtils.isMergeCommit(gitCommit)
-        if(isMergeCommit){
-            def gitToken
-            if(script.commonPipelineEnvironment.configuration.general?.githubTokenCredentialsId){
-                gitToken = script.commonPipelineEnvironment.configuration.general?.githubTokenCredentialsId
-            }else if(script.commonPipelineEnvironment.configuration.steps?.codeqlExecuteScan?.githubTokenCredentialsId){
-                gitToken = script.commonPipelineEnvironment.configuration.steps.codeqlExecuteScan.githubTokenCredentialsId
-            }
+    if (!gitBranch.contains("PR")) {
+        script.commonPipelineEnvironment.setGitRef("refs/heads/" + gitBranch)
+        script.commonPipelineEnvironment.setGitRemoteCommitId(gitCommit)
+        return
+    }
 
-            print "change id ${changeId} and token ${gitToken}"
-            if(gitToken){
-                Map url = parseUrl(gitUrl)
-                def gitUrlWithToken = "https://${gitToken}@${url.host}/${url.path}"
-                String gitCommitId = gitUtils.getGitMergeCommit(changeId, gitToken, gitUrlWithToken)
-                print "commitId ${gitCommitId}"
-                script.commonPipelineEnvironment.setGitCommitId(gitCommitId)
-            }
-        }
+    boolean isMergeCommit = gitUtils.isMergeCommit(gitCommit)
+    def mergeOrHead = isMergeCommit?"merge":"head"
+    def changeId = gitBranch.split("-")[1]
+    script.commonPipelineEnvironment.setGitRef("refs/pull/" + changeId + "/" + mergeOrHead)
 
-        def mergeOrHead = isMergeCommit?"merge":"head"
-		script.commonPipelineEnvironment.setGitRef("refs/pull/" + changeId + "/" + mergeOrHead)
-	} else {
-		script.commonPipelineEnvironment.setGitRef("refs/heads/" + gitBranch)
-	}
+    if(!isMergeCommit){
+        script.commonPipelineEnvironment.setGitRemoteCommitId(gitCommit)
+        return
+    }
+
+    String gitRemoteCommitId
+    try{
+        gitRemoteCommitId = gitUtils.getGitMergeCommitId(changeId)
+    }catch(Exception e){
+        echo "Exception in getting git merge commit id: ${e}"
+    }
+
+    if(gitRemoteCommitId.?trim()){
+        script.commonPipelineEnvironment.setGitRemoteCommitId(gitRemoteCommitId)
+    }else{
+        script.commonPipelineEnvironment.setGitRemoteCommitId(gitCommit)
+    }
 }

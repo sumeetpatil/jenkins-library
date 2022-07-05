@@ -313,7 +313,7 @@ class SetupCommonPipelineEnvironmentTest extends BasePiperTest {
             return path.endsWith('.pipeline/config.yml')
         })
 
-        def dummyScmInfo = [GIT_BRANCH: 'origin/testbranch']
+        def dummyScmInfo = [GIT_COMMIT: 'dummy_git_commit_id', GIT_BRANCH: 'origin/testbranch']
 
         stepRule.step.setupCommonPipelineEnvironment(script: nullScript, scmInfo: dummyScmInfo)
         assertThat(nullScript.commonPipelineEnvironment.gitRef, is('refs/heads/testbranch'))
@@ -326,6 +326,10 @@ class SetupCommonPipelineEnvironmentTest extends BasePiperTest {
             boolean isMergeCommit(String gitCommitId){
                 return false
             }
+
+            String getGitMergeCommitId(String gitChangeId){
+                return "dummy_merge_git_commit_id"
+            }
         }
 
         helper.registerAllowedMethod("fileExists", [String], { String path ->
@@ -336,6 +340,8 @@ class SetupCommonPipelineEnvironmentTest extends BasePiperTest {
 
         stepRule.step.setupCommonPipelineEnvironment(script: nullScript, scmInfo: dummyScmInfo)
         assertThat(nullScript.commonPipelineEnvironment.gitRef, is('refs/pull/42/head'))
+        assertThat(nullScript.commonPipelineEnvironment.gitRemoteCommitId, is('dummy_git_commit_id'))
+        assertThat(nullScript.commonPipelineEnvironment.gitCommitId, is('dummy_git_commit_id'))
     }
 
     @Test
@@ -344,6 +350,10 @@ class SetupCommonPipelineEnvironmentTest extends BasePiperTest {
         def GitUtils gitUtils = new GitUtils() {
             boolean isMergeCommit(String gitCommitId){
                 return true
+            }
+
+            String getGitMergeCommitId(String gitChangeId){
+                return "dummy_merge_git_commit_id"
             }
         }
 
@@ -355,6 +365,8 @@ class SetupCommonPipelineEnvironmentTest extends BasePiperTest {
 
         stepRule.step.setupCommonPipelineEnvironment(script: nullScript, scmInfo: dummyScmInfo, gitUtils: gitUtils)
         assertThat(nullScript.commonPipelineEnvironment.gitRef, is('refs/pull/42/merge'))
+        assertThat(nullScript.commonPipelineEnvironment.gitRemoteCommitId, is('dummy_merge_git_commit_id'))
+        assertThat(nullScript.commonPipelineEnvironment.gitCommitId, is('dummy_git_commit_id'))
     }
 
     @Test

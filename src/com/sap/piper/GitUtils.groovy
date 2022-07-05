@@ -9,15 +9,43 @@ boolean isMergeCommit(String gitCommitId){
     return sh(returnStatus: true, script: cmd) == 0
 }
 
-String getGitMergeCommit(String gitChangeId, String credentialId, String gitUrlWithToken){
-    def ref = "refs/remotes/origin/pull/"+gitChangeId+"/merge"
-    def cmd = "git rev-parse " + ref
-    withCredentials([string(credentialsId: credentialId, variable: 'SECRET')]) {
-        sh 'git remote -v'
-        sh 'git remote set-url origin ' + gitUrlWithToken.replace(credentialId, "${SECRET}")
+String getGitMergeCommitId(String gitChangeId){
+    String commitId
+    if(!scm){
+        throw new Exception('scm content not found')
     }
-    sh 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"'
-    return sh(returnStdout: true, script: cmd).trim()
+
+    def remoteConfig = scm.getUserRemoteConfigs()
+    if(!remoteConfig || remoteConfig.size == 0 || !remoteConfig[0].getCredentialsId())){
+        throw new Exception('scm remote configuration not found')
+    }
+
+
+    def scmCredId = remoteConfig[0].getCredentialsId()
+    def statusOfFetch = false
+    try{
+        withCredentials([gitUsernamePassword(credentialsId: scmCredId, gitToolName: 'git-tool')]) {
+            statusOfFetch = sh(returnStatus: true, script: 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"')
+        }
+    } catch (Exception e) {
+            echo 'Error in running git fetch ' + e.toString()
+            throw new e
+    }
+
+    if(!statusOfFetch){
+        throw new Exception('Error in running git fetch')
+    }
+
+    def commitId
+    def cmd = "git rev-parse refs/remotes/origin/pull/"+gitChangeId+"/merge"
+    try {
+        commitId = sh(returnStdout: true, script: cmd).trim()
+    } catch (Exception e) {
+        echo 'Exception occurred getting the git merge commitId'
+        throw e
+    }
+
+    return commitId
 }
 
 boolean isWorkTreeDirty() {
