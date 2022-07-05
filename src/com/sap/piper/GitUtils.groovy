@@ -29,7 +29,7 @@ String getGitMergeCommitId(String gitChangeId){
         }
     } catch (Exception e) {
         echo 'Error in running git fetch'
-        throw new e
+        throw e
     }
 
     if(!statusOfFetch){
