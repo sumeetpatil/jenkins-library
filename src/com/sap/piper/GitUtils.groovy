@@ -19,19 +19,27 @@ String getGitMergeCommitId(String gitChangeId){
         throw new Exception('scm remote configuration not found')
     }
 
-    echo scm.getUserRemoteConfigs()
 
     def scmCredId = remoteConfig[0].getCredentialsId()
     try{
         withCredentials([gitUsernamePassword(credentialsId: scmCredId, gitToolName: 'git-tool')]) {
             sh 'git fetch origin "+refs/pull/'+gitChangeId+'/*:refs/remotes/origin/pull/'+gitChangeId+'/*"'
-            def cmd = "git rev-parse refs/remotes/origin/pull/"+gitChangeId+"/merge"
-            return sh(returnStdout: true, script: cmd).trim()
         }
     } catch (Exception e) {
         echo 'Error in running git fetch'
         throw e
     }
+
+    String commitId
+    def cmd = "git rev-parse refs/remotes/origin/pull/"+gitChangeId+"/merge"
+    try {
+        commitId = sh(returnStdout: true, script: cmd).trim()
+    } catch (Exception e) {
+        echo 'Exception occurred getting the git merge commitId'
+        throw e
+    }
+
+    return commitId
 }
 
 boolean isWorkTreeDirty() {
