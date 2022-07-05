@@ -127,6 +127,8 @@ void call(Map parameters = [:]) {
             print "configurationkey = ${e.key}, value = ${e.value}"
         }
 
+        def scmCredId = scm.getUserRemoteConfigs()[0].getCredentialsId()
+        print "CredId ${scmCredId}"
         def scmInfo = parameters.scmInfo
         if (scmInfo) {
             setGitUrlsOnCommonPipelineEnvironment(script, scmInfo.GIT_URL)
@@ -291,7 +293,7 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitUrl, String 
         if(isMergeCommit){
             def gitToken
             if(script.commonPipelineEnvironment.configuration.general?.githubTokenCredentialsId){
-                gitToken = script.commonPipelineEnvironment.configuration.githubTokenCredentialsId
+                gitToken = script.commonPipelineEnvironment.configuration.general?.githubTokenCredentialsId
             }else if(script.commonPipelineEnvironment.configuration.steps?.codeqlExecuteScan?.githubTokenCredentialsId){
                 gitToken = script.commonPipelineEnvironment.configuration.steps.codeqlExecuteScan.githubTokenCredentialsId
             }
