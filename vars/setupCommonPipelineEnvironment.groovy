@@ -296,14 +296,9 @@ private void setGitRefOnCommonPipelineEnvironment(script, String gitCommit, Stri
         echo "Exception in getting git merge commit id: ${e}"
     }
 
-    echo "git commit ${gitRemoteCommitId}"
-
     if(gitRemoteCommitId?.trim()){
         script.commonPipelineEnvironment.setGitRemoteCommitId(gitRemoteCommitId)
     }else{
         script.commonPipelineEnvironment.setGitRemoteCommitId(gitCommit)
     }
-
-    def remoteCommit = script.commonPipelineEnvironment.getGitRemoteCommitId()
-    echo "remoteCommit ${remoteCommit}"
 }
