@@ -9,5 +9,5 @@ void call(Map parameters = [:]) {
     echo "checkmarx1"
     List credentials = [[type: 'usernamePassword', id: 'checkmarxCredentialsId', env: ['PIPER_username', 'PIPER_password']]]
     echo "checkmarx2"
-    piperExecuteBin(parameters, STEP_NAME, METADATA_FILE, credentials, true)
+    piperExecuteBin(parameters, STEP_NAME, METADATA_FILE, credentials)
 }
