@@ -175,6 +175,8 @@ func uploadResults(config *codeqlExecuteScanOptions, utils codeqlExecuteScanUtil
 }
 
 func runCodeqlExecuteScan(config *codeqlExecuteScanOptions, telemetryData *telemetry.CustomData, utils codeqlExecuteScanUtils) error {
+	print "codeql executescan test"
+	print config
 	var reports []piperutils.Path
 	cmd := []string{"database", "create", config.Database, "--overwrite", "--source-root", config.ModulePath}
 
