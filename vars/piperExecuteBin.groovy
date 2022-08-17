@@ -79,6 +79,7 @@ void call(Map parameters = [:], String stepName, String metadataFile, List crede
                         try {
                             try {
                                 credentialWrapper(config, credentialInfo) {
+                                    echo "sh ${piperGoPath} ${stepName}${defaultConfigArgs}${customConfigArg}"
                                     sh "${piperGoPath} ${stepName}${defaultConfigArgs}${customConfigArg}"
                                 }
                             } finally {
