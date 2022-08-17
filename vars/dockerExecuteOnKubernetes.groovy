@@ -308,6 +308,9 @@ void executeOnPod(Map config, utils, Closure body, Script script) {
         if (config.containerName && stashContent.isEmpty()) {
             stashContent = [stashWorkspace(config, 'workspace')]
         }
+        
+        print config
+
         podTemplate(getOptions(config)) {
             node(config.uniqueId) {
                 if (config.sidecarReadyCommand) {
