@@ -102,6 +102,7 @@ func getGitRepoInfo(repoUri string, repoInfo *RepoInfo) error {
 }
 
 func uploadResults(config *codeqlExecuteScanOptions, utils codeqlExecuteScanUtils) error {
+	log.Entry().Infof("CommitId1 %s", config.CommitID)
 	if config.UploadResults {
 		if len(config.GithubToken) == 0 {
 			return errors.New("failed running upload-results as github token was not specified")
@@ -113,6 +114,7 @@ func uploadResults(config *codeqlExecuteScanOptions, utils codeqlExecuteScanUtil
 
 		var repoInfo RepoInfo
 		err := getGitRepoInfo(config.Repository, &repoInfo)
+		log.Entry().Infof("CommitId2 %s", config.CommitID)
 		if err != nil {
 			log.Entry().Error(err)
 		}
@@ -123,11 +125,13 @@ func uploadResults(config *codeqlExecuteScanOptions, utils codeqlExecuteScanUtil
 		if err != nil {
 			log.Entry().Error(err)
 		} else {
+			log.Entry().Infof("repoInfo %s CommitId3 %s", repoInfo.commitId, config.CommitID)
 			if repoInfo.ref == "" {
 				repoInfo.ref = provider.GetReference()
 			}
 
 			if repoInfo.commitId == "" {
+				log.Entry().Infof("repoInfo %s CommitId4 %s", repoInfo.commitId, config.CommitID)
 				repoInfo.commitId = provider.GetCommit()
 			}
 
@@ -140,8 +144,9 @@ func uploadResults(config *codeqlExecuteScanOptions, utils codeqlExecuteScanUtil
 		}
 
 		cmd := []string{"github", "upload-results", "--sarif=" + fmt.Sprintf("%vtarget/codeqlReport.sarif", config.ModulePath), "-a=" + config.GithubToken}
-
+		log.Entry().Infof("repoInfo %s CommitId5 %s", repoInfo.commitId, config.CommitID)
 		if repoInfo.commitId != "" {
+			log.Entry().Infof("repoInfo %s CommitId6 %s", repoInfo.commitId, config.CommitID)
 			cmd = append(cmd, "--commit="+repoInfo.commitId)
 		}
 
