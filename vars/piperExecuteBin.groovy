@@ -69,6 +69,8 @@ void call(Map parameters = [:], String stepName, String metadataFile, List crede
                 config.stashNoDefaultExcludes = parameters.stashNoDefaultExcludes
             }
 
+            print script
+            print config
             dockerWrapper(script, stepName, config) {
                 handleErrorDetails(stepName) {
                     writePipelineEnv(script: script, piperGoPath: piperGoPath)
