@@ -158,6 +158,7 @@ and Java plus Maven.`,
 					GeneralConfig.HookConfig.SplunkConfig.Index,
 					GeneralConfig.HookConfig.SplunkConfig.SendLogs)
 			}
+			log.Entry().Infof("test commit %s", stepConfig.CommitID)
 			codeqlExecuteScan(stepConfig, &stepTelemetryData)
 			stepTelemetryData.ErrorCode = "0"
 			log.Entry().Info("SUCCESS")
