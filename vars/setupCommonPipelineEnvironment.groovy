@@ -125,7 +125,7 @@ void call(Map parameters = [:]) {
             setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_COMMIT, scmInfo.GIT_BRANCH, gitUtils)
         }
 
-        echo script.commonPipelineEnvironment
+        echo script.commonPipelineEnvironment.getGitCommitId()
     }
 }
 
