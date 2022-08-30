@@ -124,6 +124,8 @@ void call(Map parameters = [:]) {
             def gitUtils = parameters.gitUtils ?: new GitUtils()
             setGitRefOnCommonPipelineEnvironment(script, scmInfo.GIT_COMMIT, scmInfo.GIT_BRANCH, gitUtils)
         }
+
+        echo commonPipelineEnvironment
     }
 }
 
