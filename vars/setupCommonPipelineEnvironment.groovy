@@ -55,7 +55,7 @@ import groovy.transform.Field
 void call(Map parameters = [:]) {
 
     handlePipelineStepErrors (stepName: STEP_NAME, stepParameters: parameters) {
-
+        echo "test sumeet1"
         def script = checkScript(this, parameters)
 
         String configFile = parameters.get('configFile')
@@ -68,7 +68,7 @@ void call(Map parameters = [:]) {
             cd ->
                 writeFile file: ".pipeline/${cd}", text: libraryResource(cd)
         }
-
+        echo "test sumeet2"
         List customDefaultsFiles = Utils.appendParameterToStringList(
             [], parameters, 'customDefaultsFromFiles')
 
@@ -85,7 +85,7 @@ void call(Map parameters = [:]) {
         }
         String customDefaultsCredentialsId = script.commonPipelineEnvironment.configuration.general?.customDefaultsCredentialsId
         customDefaultsFiles = copyOrDownloadCustomDefaultsIntoPipelineEnv(script, customDefaultsFiles, customDefaultsCredentialsId)
-
+        echo "test sumeet3"
         prepareDefaultValues([
             script: script,
             customDefaults: parameters.customDefaults,
@@ -98,7 +98,7 @@ void call(Map parameters = [:]) {
             stashIncludes += ", $configFile"
         }
         stash name: 'pipelineConfigAndTests', includes: stashIncludes, allowEmpty: true
-
+        echo "test sumeet4"
         Map config = ConfigurationHelper.newInstance(this)
             .loadStepDefaults()
             .mixinGeneralConfig(script.commonPipelineEnvironment, GENERAL_CONFIG_KEYS)
@@ -115,7 +115,7 @@ void call(Map parameters = [:]) {
         InfluxData.addField('step_data', 'build_url', env.BUILD_URL)
         InfluxData.addField('pipeline_data', 'build_url', env.BUILD_URL)
 
-        echo "test sumeet"
+        echo "test sumeet5"
         def scmInfo = parameters.scmInfo
         if (scmInfo) {
             setGitUrlsOnCommonPipelineEnvironment(script, scmInfo.GIT_URL)
