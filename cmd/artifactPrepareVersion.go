@@ -89,6 +89,7 @@ func newArtifactPrepareVersionUtilsBundle() artifactPrepareVersionUtils {
 }
 
 func artifactPrepareVersion(config artifactPrepareVersionOptions, telemetryData *telemetry.CustomData, commonPipelineEnvironment *artifactPrepareVersionCommonPipelineEnvironment) {
+	log.Entry().Info("Called artifactPrepareVersion")
 	utils := newArtifactPrepareVersionUtilsBundle()
 
 	// open local .git repository
