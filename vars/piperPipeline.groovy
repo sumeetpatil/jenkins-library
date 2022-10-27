@@ -49,11 +49,9 @@ void call(parameters) {
                    echo "test"
                    echo parameters.script.commonPipelineEnvironment.getStepConfiguration('', '').productiveBranch
                    echo parameters.script.commonPipelineEnvironment.configuration.runStage?.get(env.STAGE_NAME)
+                   piperPipelineStageSecurity script: parameters.script
                 }
-                when {allOf {branch parameters.script.commonPipelineEnvironment.getStepConfiguration('', '').productiveBranch; expression {return parameters.script.commonPipelineEnvironment.configuration.runStage?.get(env.STAGE_NAME)}}}
-                steps {
-                    piperPipelineStageSecurity script: parameters.script
-                }
+                //when {allOf {branch parameters.script.commonPipelineEnvironment.getStepConfiguration('', '').productiveBranch; expression {return parameters.script.commonPipelineEnvironment.configuration.runStage?.get(env.STAGE_NAME)}}}
             }
             stage('Performance') {
                 when {allOf {branch parameters.script.commonPipelineEnvironment.getStepConfiguration('', '').productiveBranch; expression {return parameters.script.commonPipelineEnvironment.configuration.runStage?.get(env.STAGE_NAME)}}}
