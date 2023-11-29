@@ -64,6 +64,7 @@ func codeqlQuery(cmd []string, codeqlQuery string) []string {
 }
 
 func execute(utils codeqlExecuteScanUtils, cmd []string, isVerbose bool) error {
+	log.Entry().Infof("Executing command: codeql %v", strings.Join(cmd, " "))
 	if isVerbose {
 		cmd = append(cmd, "-v")
 	}
