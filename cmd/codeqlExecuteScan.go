@@ -261,6 +261,11 @@ func runCodeqlExecuteScan(config *codeqlExecuteScanOptions, telemetryData *telem
 		log.Entry().Infof("CodeQL image version: %s", string(codeqlVersion))
 	}
 
+	log.Entry().Infof("Printing all envs")
+	for _, e := range os.Environ() {
+		log.Entry().Infof(e)
+	}
+
 	var reports []piperutils.Path
 	cmd := []string{"database", "create", config.Database, "--overwrite", "--source-root", ".", "--working-dir", config.ModulePath}
 
